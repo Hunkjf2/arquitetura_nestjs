@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id                                    Int                                     @id @default(autoincrement())
+  nome                                  String                                  @db.VarChar(250)
+  email                                 String?                                 @unique @db.VarChar(250)
+  login                                 String                                  @db.Text
+  password                              String                                  @db.Text
+  perfils                               Perfil                                  @relation(fields: [id_perfil], references: [id])
+  id_perfil                             Int                                     @db.Integer
+  createdAt                             DateTime                                @default(now()) @db.Timestamptz(3)
+  updatedAt                             DateTime                                @default(now()) @db.Timestamptz(3)
+
+  @@map("usuario") 
+}
+
+model Perfil {
+  id        Int             @id @default(autoincrement())
+  descricao String          @unique @db.VarChar(250)
+  createdAt DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime        @default(now()) @db.Timestamptz(3)
+  usuario   Usuario[]
+  perfilRecurso   PerfilRecurso[]
+
+  @@map("perfil")
+}
+
+model Recurso {
+  id        Int             @id @default(autoincrement())
+  descricao String          @unique @db.Text()
+  role String               @db.Text()
+  createdAt DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime        @default(now()) @db.Timestamptz(3)
+  perfilRecurso  PerfilRecurso[]
+
+  @@map("recurso")
+}
+
+model PerfilRecurso {
+  perfil     Perfil  @relation(fields: [perfil_id], references: [id])
+  perfil_id  Int
+  recurso    Recurso @relation(fields: [recurso_id], references: [id])
+  recurso_id Int
+
+  @@id([perfil_id, recurso_id])
+  @@map("perfil_recurso")
+}
+
